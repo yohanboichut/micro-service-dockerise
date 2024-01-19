@@ -1,0 +1,38 @@
+server:
+  port: 8080
+
+spring:
+
+  application:
+    name: gateway
+
+  cloud:
+
+    consul:
+      discovery:
+        register: true
+      host: ${CONSUL_HOST:localhost}
+      port: ${CONSUL_PORT:8500}
+      loadbalancer:
+        ribbon:
+          enabled: false
+
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+
+      routes:
+        - id: rewritepath_route_auth
+          uri: lb://service-auth
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - RewritePath=/api/auth(?<segment>/?.*), /authent$\{segment}
+        - id: rewritepath_route_pileouface
+          uri: lb://pileouface
+          predicates:
+            - Path=/api/pileouface/**
+          filters:
+            - RewritePath=/api/pileouface(?<segment>/?.*), /jeu$\{segment}
+            - PreserveHostHeader

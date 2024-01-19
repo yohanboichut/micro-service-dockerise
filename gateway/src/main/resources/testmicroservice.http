@@ -1,0 +1,234 @@
+
+POST localhost:8080/api/auth/inscription?pseudo=yoh&mdp=yoh
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Le compte n'a pas été créé");
+});
+%}
+###
+
+
+
+POST localhost:8080/api/auth/inscription?pseudo=yoh&mdp=fred
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 409, "Il y aurait du y avoir un conflit");
+});
+%}
+
+###
+
+
+
+POST localhost:8080/api/auth/token?pseudo=yoh&mdp=yoh
+
+
+> {%
+client.global.set("auth_token", response.headers.valueOf("token"));
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Le token aurait dû être créé");
+});
+%}
+
+###
+
+
+POST localhost:8080/api/auth/token?pseudo=yoh&mdp=fred
+
+
+> {%
+
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 401, "Les identifiants ne sont pas corrects et auraient dû provoquer un 401");
+});
+%}
+###
+
+
+POST localhost:8080/api/auth/token?pseudo=fred&mdp=fred
+
+
+> {%
+
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 404, "L'utilisateur n'existe pas et cela aurait dû provoquer un 404");
+});
+%}
+###
+
+
+
+
+
+
+GET localhost:8080/api/auth/token?token={{auth_token}}
+
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Le token aurait dû être valide");
+});
+%}
+
+###
+
+GET localhost:8080/api/auth/token?token=rezarzerar
+
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 404, "Le token aurait dû être valide");
+});
+%}
+
+
+###
+
+
+POST localhost:8080/api/pileouface/partie
+token: {{auth_token}}
+Content-Type: application/x-www-form-urlencoded
+
+prediction=Pile
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "La partie aurait dû être possible");
+});
+%}
+
+###
+
+
+POST localhost:8080/api/pileouface/partie
+token: bababr
+Content-Type: application/x-www-form-urlencoded
+
+prediction=Pile
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 404, "On aurait dû avoir un 404 car le token n'existe pas");
+});
+%}
+
+###
+
+
+POST localhost:8080/api/pileouface/partie
+token: {{auth_token}}
+Content-Type: application/x-www-form-urlencoded
+
+prediction=Pile
+
+###
+
+POST localhost:8080/api/pileouface/partie
+token: {{auth_token}}
+Content-Type: application/x-www-form-urlencoded
+
+prediction=Pile
+
+###
+
+POST localhost:8080/api/pileouface/partie
+token: {{auth_token}}
+Content-Type: application/x-www-form-urlencoded
+
+prediction=Pile
+
+###
+
+
+
+
+
+POST localhost:8080/api/pileouface/partie
+token: {{auth_token}}
+Content-Type: application/x-www-form-urlencoded
+
+prediction=Pile
+
+###
+
+POST localhost:8080/api/pileouface/partie
+token: {{auth_token}}
+Content-Type: application/x-www-form-urlencoded
+
+prediction=Pile
+
+###
+
+GET localhost:8080/api/pileouface/partie
+token: {{auth_token}}
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "On aurait dû pouvoir récupérer les parties");
+});
+%}
+
+###
+
+GET localhost:8080/api/pileouface/statistiques
+token: {{auth_token}}
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "On aurait dû récupérer les statistiques");
+});
+%}
+###
+
+
+
+GET localhost:8080/api/pileouface/statistiques
+token: babar
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 404, "On aurait dû avoir un 404 car le token n'existe pas");
+});
+%}
+###
+
+DELETE http://localhost:8080/api/auth/inscription/yoh
+Content-Type: application/x-www-form-urlencoded
+
+mdp=fred
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 401, "Code 401 attendu car mot de passe incorrect");
+});
+%}
+
+###
+
+
+
+DELETE http://localhost:8080/api/auth/inscription/fred
+Content-Type: application/x-www-form-urlencoded
+
+mdp=fred
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 404, "Code 404 attendu car utilisateur inconnu");
+});
+%}
+
+###
+
+DELETE http://localhost:8080/api/auth/inscription/yoh
+Content-Type: application/x-www-form-urlencoded
+
+mdp=yoh
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Le compte aurait dû être supprimé");
+});
+%}
